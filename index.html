@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#090807">
+<title>Laksmi | Baby Name Reveal</title>
+<style>
+:root{--gold:#d9b66e;--pale:#f4dfaa}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(ellipse at top,#282012,#090807 65%);color:#f7edda;font-family:Georgia,serif}
+.page{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:22px 15px}
+.panel{width:min(100%,470px);text-align:center;padding:34px 23px;border:1px solid #92733e;border-radius:23px;background:linear-gradient(145deg,#19150f,#0b0a08);box-shadow:0 20px 65px #0009}
+.kicker{font:10px Arial,sans-serif;letter-spacing:.28em;color:var(--gold);text-transform:uppercase}
+h1{font-size:clamp(42px,11vw,58px);font-weight:400;line-height:1.02;color:var(--pale);margin:18px 0}
+p{color:#d1c3a4;line-height:1.8;font-size:14px}
+.rule{height:1px;background:linear-gradient(90deg,transparent,#92733e,transparent);margin:25px auto;width:80%}
+.parents-label{font:10px Arial,sans-serif;letter-spacing:.22em;color:#bda36c}
+.parent{font-size:29px;color:#f0d99f;margin:12px 0 3px}
+.amp{color:var(--gold);font-size:14px}
+.date{font:11px Arial,sans-serif;letter-spacing:.16em;color:#bca77c;margin-top:24px}
+.gold-btn{border:1px solid #e0c27e;background:linear-gradient(120deg,#98702f,#efd28a,#a77e3c);color:#171108;border-radius:999px;padding:16px 25px;font:bold 11px Arial,sans-serif;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;box-shadow:0 7px 25px #c99b4930}
+.gold-btn:active{transform:scale(.98)}
+.secondary{border:1px solid #806638;background:transparent;color:#e0c27e;border-radius:999px;padding:11px 18px;cursor:pointer}
+#scratchPage{display:none}
+.card{position:relative;width:100%;max-width:370px;margin:22px auto 12px;aspect-ratio:1.28;border-radius:17px;overflow:hidden;border:1px solid #b38d4d;background:#120f0a;box-shadow:0 12px 35px #0009}
+.under{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:13px;padding:15px;background:radial-gradient(circle at 50% 35%,#47351b,#15110b 70%)}
+.tiny{font:10px Arial,sans-serif;letter-spacing:.2em;color:#d5b56f}
+.name{font-size:clamp(32px,9vw,45px);color:#f5d992;letter-spacing:.06em}
+.note{font:12px Arial,sans-serif;color:#d0c09c}
+canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:crosshair}
+.instruction{font:11px Arial,sans-serif;color:#d4bd8a;line-height:1.7}
+.footer{font:10px Arial,sans-serif;letter-spacing:.15em;color:#87785a;margin-top:25px}
+</style>
+</head>
+<body>
+<section class="page" id="welcomePage">
+ <div class="panel">
+  <div style="color:#d9b66e;font-size:26px;letter-spacing:8px">✧ ❖ ✧</div>
+  <div class="kicker">A beautiful new beginning</div>
+  <h1>A Little<br>Miracle</h1>
+  <p>Our hearts are filled with love and happiness. A precious little blessing has made our world brighter.</p>
+  <div class="rule"></div>
+  <div class="parents-label">WITH LOVE FROM THE PROUD PARENTS</div>
+  <div class="parent">Selvakumar</div><div class="amp">&amp;</div><div class="parent">Vinothini</div>
+  <div class="date">NAMING CEREMONY · 23 NOVEMBER 2026</div>
+  <div class="rule"></div>
+  <button type="button" class="gold-btn" id="openScratch">DISCOVER THE SURPRISE ✦</button>
+  <div class="footer">A LITTLE NAME · A LIFETIME OF LOVE</div>
+ </div>
+</section>
+
+<section class="page" id="scratchPage">
+ <div class="panel">
+  <div style="color:#d9b66e;font-size:25px">✧</div>
+  <div class="kicker">The moment we've been waiting for</div>
+  <h1 style="font-size:36px">A name filled with love</h1>
+  <p>Gently scratch the golden card to discover our little one's name.</p>
+  <div class="card" id="scratchCard">
+   <div class="under">
+    <div class="tiny">INTRODUCING OUR LITTLE ONE</div>
+    <div class="name">LAKSMI</div>
+    <div class="note">A precious blessing to cherish forever ♡</div>
+   </div>
+   <canvas id="foil" aria-label="Scratch here to reveal Laksmi"></canvas>
+  </div>
+  <div class="instruction" id="instruction">✦ Use your finger or mouse to scratch away the gold ✦</div>
+  <button type="button" class="secondary" id="resetCard">Reset scratch card</button>
+  <div class="footer">WITH LOVE · SELVAKUMAR &amp; VINOTHINI</div>
+ </div>
+</section>
+<script>
+(function(){
+ const welcome=document.getElementById('welcomePage');
+ const scratch=document.getElementById('scratchPage');
+ const openBtn=document.getElementById('openScratch');
+ const canvas=document.getElementById('foil');
+ const card=document.getElementById('scratchCard');
+ const ctx=canvas.getContext('2d');
+ let drawing=false,last=null,done=false;
+ function showScratch(){
+   welcome.style.display='none';
+   scratch.style.display='flex';
+   window.scrollTo(0,0);
+   requestAnimationFrame(()=>requestAnimationFrame(drawFoil));
+ }
+ openBtn.addEventListener('click',showScratch);
+ // Also expose a direct handler for restrictive preview environments.
+ window.openScratchCard=showScratch;
+ function drawFoil(){
+   const r=card.getBoundingClientRect();
+   if(!r.width)return;
+   const dpr=Math.min(window.devicePixelRatio||1,2);
+   canvas.width=Math.round(r.width*dpr);canvas.height=Math.round(r.height*dpr);
+   ctx.setTransform(dpr,0,0,dpr,0,0);
+   const g=ctx.createLinearGradient(0,0,r.width,r.height);
+   g.addColorStop(0,'#89642e');g.addColorStop(.24,'#efd58f');g.addColorStop(.5,'#a77f3d');g.addColorStop(.76,'#f0d99d');g.addColorStop(1,'#80602e');
+   ctx.globalCompositeOperation='source-over';ctx.fillStyle=g;ctx.fillRect(0,0,r.width,r.height);
+   for(let i=0;i<150;i++){ctx.fillStyle='rgba(255,244,205,'+(Math.random()*.22)+')';ctx.beginPath();ctx.arc(Math.random()*r.width,Math.random()*r.height,Math.random()*1.3,0,Math.PI*2);ctx.fill()}
+   ctx.fillStyle='#39280f';ctx.textAlign='center';ctx.font='11px Arial';ctx.fillText('✦  A SPECIAL SURPRISE  ✦',r.width/2,r.height/2-18);
+   ctx.font='bold 22px Georgia';ctx.fillText('SCRATCH HERE',r.width/2,r.height/2+14);
+   ctx.font='10px Arial';ctx.fillText('REVEAL THE LITTLE ONE',r.width/2,r.height/2+38);
+   done=false;last=null;document.getElementById('instruction').textContent='✦ Use your finger or mouse to scratch away the gold ✦';
+ }
+ function point(e){const r=canvas.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}}
+ function erase(e){
+   if(!drawing||done)return;
+   const p=point(e);ctx.globalCompositeOperation='destination-out';ctx.lineWidth=44;ctx.lineCap='round';ctx.lineJoin='round';
+   ctx.beginPath();if(last){ctx.moveTo(last.x,last.y);ctx.lineTo(p.x,p.y)}else{ctx.arc(p.x,p.y,22,0,Math.PI*2)}ctx.stroke();last=p;
+ }
+ function check(){
+   if(done)return;
+   const data=ctx.getImageData(0,0,canvas.width,canvas.height).data;let clear=0,total=0;
+   for(let i=3;i<data.length;i+=96){total++;if(data[i]<30)clear++}
+   if(clear/total>.42){done=true;ctx.clearRect(0,0,canvas.width,canvas.height);document.getElementById('instruction').textContent='♡ The name is revealed — Laksmi! Sending love and blessings.'}
+ }
+ canvas.addEventListener('pointerdown',e=>{drawing=true;last=null;canvas.setPointerCapture(e.pointerId);erase(e)});
+ canvas.addEventListener('pointermove',erase);
+ canvas.addEventListener('pointerup',()=>{drawing=false;last=null;check()});
+ canvas.addEventListener('pointercancel',()=>{drawing=false;last=null});
+ document.getElementById('resetCard').addEventListener('click',drawFoil);
+ window.addEventListener('resize',()=>{if(scratch.style.display!=='none')drawFoil()});
+})();
+</script>
+</body>
+</html>
